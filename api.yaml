@@ -1,0 +1,140 @@
+info:
+  version: "0.0.1"
+  title: Simple transaction service API
+  description: |
+    API for simulation of bank transactions
+
+paths:
+  /api/accounts:
+    get:
+      summary: Returns list of all accounts
+      responses:
+        '200':
+          description: List of all accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type:
+                    $ref: '#/definitions/Account'
+        '500':
+          description: Internal server error
+
+    post:
+      summary: Creates new account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+                $ref: '#/definitions/Account'
+      responses:
+        '201':
+          description: Id of the newly created account
+          schema:
+            type: integer
+        '400':
+          description: Invalid request, missing input fields
+        '500':
+          description: Internal server error
+
+  /api/transactions:
+    get:
+      summary: Returns the list of transactions for a given account
+      parameters:
+        account-id:
+          description: Id of the account to check
+          type: integer
+          required: true
+        from:
+          description: Begining of the time range to check
+          type: string
+          format: date-time
+          required: false
+        end:
+          description: End of the time range to check
+          type: string
+          format: date-time
+          required: false
+      responses:
+        '200':
+          description: List of relevant transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type:
+                    $ref: '#/definitions/Transaction'
+        '400':
+          description: Missing or invalid input parameters
+        '500':
+          description: Internal server error
+
+    post:
+      summary: Triggers execution of the new transaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type:
+                $ref: '#/definitions/Transactions'
+      responses:
+        '201':
+          description: Transaction executed successfully
+        '400':
+          description: Invalid request, missing input fields or one of the accounts doesn't exist or there is not enough credit
+        '500':
+          description: Internal server error
+
+
+definitions:
+  Account:
+    type: object
+    required:
+      - name
+      - surname
+    properties:
+      id:
+        description: Unique identifier of the account used to specify transactions
+        type: integer
+      balance:
+        description: Balance of the account
+        type: number
+      name:
+        description: Name of the owner
+        type: string
+      surname:
+        description: Surname of the owner
+        type: string
+
+  Transaction:
+    type: object
+    required:
+      - destination_account_id
+      - amount
+      - transaction_type
+    properties:
+      id:
+        description: Unique identificator of the transaction
+        type: integer
+      source_account_id:
+        description: Account from which money should be taken during transfer. Relevant and required only if transaction type is TRANSFER
+        type: integer
+      destination_account_id:
+        description: Account to which money should be deposit, transferred or withdrawn from
+        type: integer
+      amount:
+        description: Amount to deposit, transfer or withdraw
+        type: number
+      transaction_type:
+        description: Type of the transaction that should be executed
+        type: string
+        enum:
+          - DEPOSIT
+          - WITHDRAW
+          - TRANSFER
+      execution_time:
+        type: string
+        format: date-time

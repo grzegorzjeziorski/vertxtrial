@@ -1,0 +1,2 @@
+siege -c5 -t20s --content-type "application/json" 'http://localhost:8080/api/transactions POST {"source_account_id": 1, "destination_account_id": 0, "transaction_type": "TRANSFER", "amount": 1.0}'
+siege -c5 -t20s --content-type "application/json" 'http://localhost:8080/api/transactions POST {"source_account_id": 0, "destination_account_id": 1, "transaction_type": "TRANSFER", "amount": 1.0}'
